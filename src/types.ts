@@ -52,4 +52,5 @@ export interface Position {
   latitude: number;
   longitude: number;
   tooltip: string;
+  alarm: boolean;
 }

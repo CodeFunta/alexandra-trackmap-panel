@@ -36,6 +36,13 @@ export const TrackMapPanel: React.FC<Props> = ({ options, data, width, height })
     popupAnchor: [0, -options.marker.size_last],
   });
 
+  const mark_alarm = new Icon({
+    iconUrl: require('img/marker_alarm.png'),
+    iconSize: [options.marker.size_last, options.marker.size_last],
+    iconAnchor: [options.marker.size_last * 0.5, options.marker.size_last],
+    popupAnchor: [0, -options.marker.size_last],
+  });
+
   useEffect(() => {
     if (mapRef.current !== null) {
       const bounds = mapRef.current.leafletElement.getBounds();
@@ -64,6 +71,11 @@ export const TrackMapPanel: React.FC<Props> = ({ options, data, width, height })
     ?.fields.find((f) => f.name === 'Value')
     ?.values?.toArray();
 
+  let alarmState: boolean[] | undefined = data.series
+    .find((f) => f.name === 'alarm')
+    ?.fields.find((f) => f.name === 'Value')
+    ?.values?.toArray();
+
   if (!latitudes && data.series?.length) {
     latitudes = data.series[0].fields.find((f) => f.name === 'latitude' || f.name === 'lat')?.values.toArray();
   }
@@ -80,6 +92,10 @@ export const TrackMapPanel: React.FC<Props> = ({ options, data, width, height })
     markerTooltips = data.series[0].fields.find((f) => f.name === 'text' || f.name === 'desc')?.values.toArray();
   }
 
+  if (!alarmState && data.series?.length) {
+    alarmState = data.series[0].fields.find((f) => f.name === 'alarm')?.values.toArray();
+  }
+
   let positions: Position[] | undefined = latitudes?.map((latitude, index) => {
     const lon = longitudes !== undefined ? longitudes[index] : 0;
     const tooltip = markerTooltips !== undefined ? markerTooltips[index] : null;
@@ -87,11 +103,12 @@ export const TrackMapPanel: React.FC<Props> = ({ options, data, width, height })
       latitude,
       longitude: lon,
       tooltip: !tooltip ? `${latitude}, ${lon}` : tooltip,
+      alarm : alarmState != undefined ? alarmState[index]: false
     };
   });
 
   if (!positions || positions.length == 0) {
-    positions = [{ latitude: 0, longitude: 0, tooltip: '' }];
+    positions = [{ latitude: 0, longitude: 0, tooltip: '', alarm:false }];
   }
 
   const heatData: any[] = [];
@@ -119,15 +136,15 @@ export const TrackMapPanel: React.FC<Props> = ({ options, data, width, height })
   if (options.marker.showOnlyLastMarker && positions?.length > 0) {
     const p = positions[positions.length - 1];
     markers.push(
-      <Marker key={0} position={[p.latitude, p.longitude]} icon={mark_last} title={p.tooltip}>
+      <Marker key={0} position={[p.latitude, p.longitude]} icon={p.alarm? mark_alarm:mark_last} title={p.tooltip} riseOnHover={true}>
         <Popup>{p.tooltip}</Popup>
       </Marker>
     );
   } else {
     positions?.forEach((p, i) => {
-      const icon = i + 1 == positions?.length || options.marker.alwaysShowIconFromLastMarker ? mark_last : mark;
+      const icon = i + 1 == positions?.length || options.marker.alwaysShowIconFromLastMarker ? (p.alarm? mark_alarm:mark_last) : mark;
       markers.push(
-        <Marker key={i} position={[p.latitude, p.longitude]} icon={icon} title={p.tooltip}>
+        <Marker key={i} position={[p.latitude, p.longitude]} icon={icon} title={p.tooltip} riseOnHover={true}>
           <Popup>{p.tooltip}</Popup>
         </Marker>
       );

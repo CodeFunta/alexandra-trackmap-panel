@@ -17,3 +17,7 @@ Initial Release
 ## v2.0.3
 * Add support for last marker image view options
 * Add support for centering map by first position
+
+## v2.0.4
+* Add support for alarm flag from data
+* Add support for alarm marker icon
