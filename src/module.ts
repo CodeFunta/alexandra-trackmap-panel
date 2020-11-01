@@ -10,12 +10,6 @@ export const plugin = new PanelPlugin<TrackMapOptions>(TrackMapPanel).setPanelOp
         name: 'Map center to first position',
         defaultValue: false,
       })
-      .addBooleanSwitch({
-        path: 'map.useCenterFromLastPos',
-        name: 'Map center to last position',
-        defaultValue: false,
-        showIf: config => !config.map.useCenterFromFirstPos,
-      })
       .addNumberInput({
         path: 'map.centerLatitude',
         name: 'Map center latitude',
@@ -72,38 +66,38 @@ export const plugin = new PanelPlugin<TrackMapOptions>(TrackMapPanel).setPanelOp
         path: 'ant.delay',
         name: 'Delay',
         defaultValue: 400,
-        showIf: config => config.viewType === 'ant' || config.viewType === 'ant-marker',
+        showIf: config => config.viewType === 'ant',
       })
       .addNumberInput({
         path: 'ant.weight',
         name: 'Weight',
         defaultValue: 5,
-        showIf: config => config.viewType === 'ant' || config.viewType === 'ant-marker',
+        showIf: config => config.viewType === 'ant',
       })
 
       .addColorPicker({
         path: 'ant.color',
         name: 'Color',
         defaultValue: 'rgb(0, 100, 255)',
-        showIf: config => config.viewType === 'ant' || config.viewType === 'ant-marker',
+        showIf: config => config.viewType === 'ant',
       })
       .addColorPicker({
         path: 'ant.pulseColor',
         name: 'Pulse color',
         defaultValue: 'rgb(0, 0, 0)',
-        showIf: config => config.viewType === 'ant' || config.viewType === 'ant-marker',
+        showIf: config => config.viewType === 'ant',
       })
       .addBooleanSwitch({
         path: 'ant.paused',
         name: 'Paused',
         defaultValue: false,
-        showIf: config => config.viewType === 'ant' || config.viewType === 'ant-marker',
+        showIf: config => config.viewType === 'ant',
       })
       .addBooleanSwitch({
         path: 'ant.reverse',
         name: 'Reverse',
         defaultValue: false,
-        showIf: config => config.viewType === 'ant' || config.viewType === 'ant-marker',
+        showIf: config => config.viewType === 'ant',
       })
       //heat
       .addBooleanSwitch({
@@ -123,31 +117,8 @@ export const plugin = new PanelPlugin<TrackMapOptions>(TrackMapPanel).setPanelOp
         path: 'marker.size',
         name: 'Size',
         defaultValue: 25,
-        showIf: config => config.viewType === 'marker' || config.viewType === 'ant-marker',
+        showIf: config => config.viewType === 'marker',
       })
-
-      .addNumberInput({
-        path: 'marker.size_last',
-        name: 'Size for last marker',
-        defaultValue: 25,
-        showIf: config => config.viewType === 'marker' || config.viewType === 'ant-marker',
-      })
-
-      
-      .addBooleanSwitch({
-        path: 'marker.showOnlyLastMarker',
-        name: 'Show only last marker',
-        defaultValue: false,
-        showIf: config => config.viewType === 'ant-marker'
-      })
-      .addBooleanSwitch({
-        path: 'marker.alwaysShowIconFromLastMarker',
-        name: 'Always show icon from last marker',
-        defaultValue: false,
-        showIf: config => config.viewType === 'marker' || config.viewType === 'ant-marker',
-      })
-      
-
       //hex
       .addNumberInput({
         path: 'hex.opacity',

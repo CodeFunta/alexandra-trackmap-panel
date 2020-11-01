@@ -26,21 +26,6 @@ export const TrackMapPanel: React.FC<Props> = ({ options, data, width, height })
   const mark = new Icon({
     iconUrl: require('img/marker.png'),
     iconSize: [options.marker.size, options.marker.size],
-    iconAnchor: [options.marker.size * 0.5, options.marker.size],
-    popupAnchor: [0, -options.marker.size],
-  });
-  const mark_last = new Icon({
-    iconUrl: require('img/marker_last.png'),
-    iconSize: [options.marker.size_last, options.marker.size_last],
-    iconAnchor: [options.marker.size_last * 0.5, options.marker.size_last],
-    popupAnchor: [0, -options.marker.size_last],
-  });
-
-  const mark_alarm = new Icon({
-    iconUrl: require('img/marker_alarm.png'),
-    iconSize: [options.marker.size_last, options.marker.size_last],
-    iconAnchor: [options.marker.size_last * 0.5, options.marker.size_last],
-    popupAnchor: [0, -options.marker.size_last],
   });
 
   useEffect(() => {
@@ -50,66 +35,47 @@ export const TrackMapPanel: React.FC<Props> = ({ options, data, width, height })
     }
     // eslint-disable-next-line
   }, []);
-
+  
   let latitudes: number[] | undefined = data.series
-    .find((f) => f.name === 'latitude' || f.name === 'lat')
-    ?.fields.find((f) => f.name === 'Value')
-    ?.values?.toArray();
-
+    .find(f => f.name === 'latitude' || f.name === 'lat')
+    ?.fields.find(f => f.name === 'Value')?.values?.toArray();
+  
   let longitudes: number[] | undefined = data.series
-    .find((f) => f.name === 'longitude' || f.name === 'lon')
-    ?.fields.find((f) => f.name === 'Value')
-    ?.values?.toArray();
-
+    .find(f => f.name === 'longitude' || f.name === 'lon')
+    ?.fields.find(f => f.name === 'Value')?.values?.toArray();
+  
   let intensities: number[] | undefined = data.series
-    .find((f) => f.name === 'intensity')
-    ?.fields.find((f) => f.name === 'Value')
-    ?.values?.toArray();
-
-  let markerTooltips: string[] | undefined = data.series
-    .find((f) => f.name === 'text' || f.name === 'desc')
-    ?.fields.find((f) => f.name === 'Value')
-    ?.values?.toArray();
-
-  let alarmState: boolean[] | undefined = data.series
-    .find((f) => f.name === 'alarm')
-    ?.fields.find((f) => f.name === 'Value')
-    ?.values?.toArray();
-
-  if (!latitudes && data.series?.length) {
-    latitudes = data.series[0].fields.find((f) => f.name === 'latitude' || f.name === 'lat')?.values.toArray();
+    .find(f => f.name === 'intensity')
+    ?.fields.find(f => f.name === 'Value')?.values?.toArray();
+  
+  if(!latitudes && data.series?.length) {
+    latitudes = data.series[0].fields
+    .find(f => f.name === 'latitude' || f.name === 'lat')
+    ?.values.toArray();
   }
 
-  if (!longitudes && data.series?.length) {
-    longitudes = data.series[0].fields.find((f) => f.name === 'longitude' || f.name === 'lon')?.values.toArray();
+  if(!longitudes && data.series?.length) {
+    longitudes = data.series[0].fields
+    .find(f => f.name === 'longitude' || f.name === 'lon')
+    ?.values.toArray();
   }
 
-  if (!intensities && data.series?.length) {
-    intensities = data.series[0].fields.find((f) => f.name === 'intensity')?.values.toArray();
-  }
-
-  if (!markerTooltips && data.series?.length) {
-    markerTooltips = data.series[0].fields.find((f) => f.name === 'text' || f.name === 'desc')?.values.toArray();
-  }
-
-  if (!alarmState && data.series?.length) {
-    alarmState = data.series[0].fields.find((f) => f.name === 'alarm')?.values.toArray();
+  if(!intensities && data.series?.length)
+  {
+    intensities = data.series[0].fields.find(f => f.name === 'intensity')?.values.toArray();
   }
 
   let positions: Position[] | undefined = latitudes?.map((latitude, index) => {
-    const lon = longitudes !== undefined ? longitudes[index] : 0;
-    const tooltip = markerTooltips !== undefined ? markerTooltips[index] : null;
     return {
       latitude,
-      longitude: lon,
-      tooltip: !tooltip ? `${latitude}, ${lon}` : tooltip,
-      alarm : alarmState != undefined ? alarmState[index]: false
+      longitude: longitudes !== undefined ? longitudes[index] : 0,
     };
   });
 
   if (!positions || positions.length == 0) {
-    positions = [{ latitude: 0, longitude: 0, tooltip: '', alarm:false }];
+    positions = [{ latitude: 0, longitude: 0 }];
   }
+
 
   const heatData: any[] = [];
   const antData: number[][] = [];
@@ -132,24 +98,15 @@ export const TrackMapPanel: React.FC<Props> = ({ options, data, width, height })
   });
 
   const markers: ReactElement[] = [];
-
-  if (options.marker.showOnlyLastMarker && positions?.length > 0) {
-    const p = positions[positions.length - 1];
+  positions?.forEach((p, i) => {
     markers.push(
-      <Marker key={0} position={[p.latitude, p.longitude]} icon={p.alarm? mark_alarm:mark_last} title={p.tooltip} riseOnHover={true}>
-        <Popup>{p.tooltip}</Popup>
+      <Marker key={i} position={[p.latitude, p.longitude]} icon={mark}>
+        <Popup>
+          {p.latitude}, {p.longitude}
+        </Popup>
       </Marker>
     );
-  } else {
-    positions?.forEach((p, i) => {
-      const icon = i + 1 == positions?.length || options.marker.alwaysShowIconFromLastMarker ? (p.alarm? mark_alarm:mark_last) : mark;
-      markers.push(
-        <Marker key={i} position={[p.latitude, p.longitude]} icon={icon} title={p.tooltip} riseOnHover={true}>
-          <Popup>{p.tooltip}</Popup>
-        </Marker>
-      );
-    });
-  }
+  });
 
   const antOptions = {
     delay: options.ant.delay,
@@ -202,23 +159,13 @@ export const TrackMapPanel: React.FC<Props> = ({ options, data, width, height })
       updateQueryVariables(minLat, minLon, maxLat, maxLon);
     }
   };
-  const mapCenter = { lat: options.map.centerLatitude, lon: options.map.centerLongitude };
+  const mapCenter = {lat:options.map.centerLatitude, lon: options.map.centerLongitude};
 
-  if (positions?.length) {
-    if (options.map.useCenterFromFirstPos && positions[0].latitude) {
-      mapCenter.lat = positions[0].latitude;
-      mapCenter.lon = positions[0].longitude;
-    }
-    if (
-      !options.map.useCenterFromFirstPos &&
-      options.map.useCenterFromLastPos &&
-      positions[positions.length - 1].latitude
-    ) {
-      mapCenter.lat = positions[positions.length - 1].latitude;
-      mapCenter.lon = positions[positions.length - 1].longitude;
-    }
+  if (options.map.useCenterFromFirstPos && positions?.length && positions[0].latitude) {
+    mapCenter.lat =  positions[0].latitude;
+    mapCenter.lon = positions[0].longitude;
   }
- 
+
   return (
     <div
       className={cx(
@@ -240,9 +187,7 @@ export const TrackMapPanel: React.FC<Props> = ({ options, data, width, height })
           onMapMoveEnd(event);
         }}
       >
-        {(options.viewType === 'ant' || options.viewType === 'ant-marker') && (
-          <AntPath positions={antData} options={antOptions} />
-        )}
+        {(options.viewType === 'ant' || options.viewType === 'ant-marker') && <AntPath positions={antData} options={antOptions} />}
         {options.viewType === 'heat' && (
           <HeatmapLayer
             fitBoundsOnLoad={options.heat.fitBoundsOnLoad}
